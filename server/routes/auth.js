@@ -1,11 +1,10 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import { users } from '../data/users.js';
 
 const router = express.Router();
 
-// Mock user data 
-const users = [];
 
 // Register
 router.post('/register', async (req, res) => {
