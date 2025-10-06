@@ -1,5 +1,5 @@
 import React, { forwardRef } from 'react';
-import cn from '../../utils/cn';    
+import { cn } from '../../utils/cn';    
 
 // Input UI component
 const Input = forwardRef(({
