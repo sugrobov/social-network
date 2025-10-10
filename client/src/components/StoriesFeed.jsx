@@ -4,8 +4,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
 import { fetchStories } from '../store/slices/storiesSlice';
 
-import { useSelector } from 'react-redux';
-
 // Константы
 const REFRESH_INTERVAL = 30000; // 30 секунд
 const DEFAULT_AVATAR = '/default-avatar.png';
