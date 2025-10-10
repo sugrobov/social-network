@@ -6,5 +6,5 @@ export const postsService = {
     getPosts: () => api.get('/posts'),
     createPost: (postData) => api.post('/posts', postData),
     likePost: (postId) => api.post(`/posts/${postId}/like`),
-    addComment: (postId, commentData) => api.post(`/posts/${postId}/comments`, commentData),
+    addComment: (postId, content) => api.post(`/posts/${postId}/comments`, { content }),
 }
