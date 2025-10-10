@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { likePost } from '../store/slices/postsSlice';
+import { likePost, addComment } from '../store/slices/postsSlice';
 
 function Post({ post }) {
-    const [showComments, setShowComments] = useState(false);
+  const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState('');
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
@@ -21,11 +21,20 @@ function Post({ post }) {
 
   const handleAddComment = async (e) => {
     e.preventDefault();
-    if (!newComment.trim()) return;
+    if (!newComment.trim() || isSubmittingComment) return;
 
-    // тут нужно добавить комментарий к посту
-    console.log('Adding comment:', newComment);
-    setNewComment('');
+    setIsSubmittingComment(true);
+        try {
+      await dispatch(addComment({ 
+        postId: post.id, 
+        content: newComment 
+      })).unwrap();
+      setNewComment('');
+    } catch (error) {
+      console.error('Error adding comment:', error);
+    } finally {
+      setIsSubmittingComment(false);
+    }
   };
 
   const formatDate = (dateString) => {
@@ -76,9 +85,8 @@ function Post({ post }) {
       <div className="flex border-t border-b border-gray-200 py-2">
         <button
           onClick={handleLike}
-          className={`flex-1 flex items-center justify-center py-2 rounded-lg transition-colors ${
-            isLiked ? 'text-red-500 hover:text-red-600' : 'text-gray-500 hover:text-gray-700'
-          }`}
+          className={`flex-1 flex items-center justify-center py-2 rounded-lg transition-colors ${isLiked ? 'text-red-500 hover:text-red-600' : 'text-gray-500 hover:text-gray-700'
+            }`}
         >
           <span className="text-lg mr-2">❤️</span>
           {isLiked ? 'Не нравится' : 'Нравится'}
@@ -132,10 +140,10 @@ function Post({ post }) {
             />
             <button
               type="submit"
-              disabled={!newComment.trim()}
-              className="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600 disabled:opacity-50"
+              disabled={!newComment.trim()  || isSubmittingComment}
+              className="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600 disabled:opacity-50 transition-colors"
             >
-              Отправить
+              {isSubmittingComment ? '...' : 'Отправить'}
             </button>
           </form>
         </div>
