@@ -1,9 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
+import PropTypes from 'prop-types';
 import { viewStory } from '../store/slices/storiesSlice';
 
 /** StoryViewer.jsx - компонент просмотра историй */
 function StoryViewer({ isOpen, onClose, stories }) {
+
+  const STORY_DURATION = 10000; // 10 секунд
+  const PROGRESS_INTERVAL = 50;
+  const PROGRESS_STEP = 100 / (STORY_DURATION / PROGRESS_INTERVAL);
+
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -13,12 +19,13 @@ function StoryViewer({ isOpen, onClose, stories }) {
   const currentStory = stories?.stories?.[currentStoryIndex];
 
   useEffect(() => {
-    if (isOpen && stories) {
-      setCurrentStoryIndex(0);
-      setProgress(0);
-      startProgress();
-      markAsViewed();
-    }
+    if (!isOpen || !stories) return;
+
+    setCurrentStoryIndex(0);
+    setProgress(0);
+    startProgress();
+    markAsViewed();
+
 
     return () => {
       clearInterval(progressInterval.current);
@@ -43,14 +50,15 @@ function StoryViewer({ isOpen, onClose, stories }) {
             nextStory();
             return 0;
           }
-          return prev + 0.5; // 10 секунд на сторис
+          return prev + PROGRESS_STEP; // 10 секунд на сторис
         });
       }
-    }, 50);
+    }, PROGRESS_INTERVAL);
   };
 
   const markAsViewed = async () => {
-    if (currentStory && !currentStory.views.includes(currentStory.author.id)) {
+    const currentUserId = JSON.parse(localStorage.getItem('user'))?.id;
+    if (currentStory && currentUserId && !currentStory.views.includes(currentStory.author.id)) {
       try {
         await dispatch(viewStory(currentStory.id)).unwrap();
       } catch (error) {
@@ -145,7 +153,7 @@ function StoryViewer({ isOpen, onClose, stories }) {
         {/* Информация об авторе */}
         <div className="absolute top-6 left-6 flex items-center space-x-3 text-white z-10">
           <img
-            src={stories.author.avatar || '/default-avatar.png'}
+            src={stories?.author?.avatar || '/default-avatar.png'}
             alt={stories.author.username}
             className="w-10 h-10 rounded-full border-2 border-white"
           />
@@ -184,5 +192,14 @@ function StoryViewer({ isOpen, onClose, stories }) {
     </div>
   );
 }
+
+StoryViewer.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  stories: PropTypes.shape({
+    author: PropTypes.object,
+    stories: PropTypes.array
+  })
+};
 
 export default StoryViewer;
