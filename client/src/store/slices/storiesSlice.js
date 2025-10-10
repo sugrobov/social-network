@@ -58,6 +58,7 @@ const storiesSlice = createSlice({
       .addCase(fetchStories.fulfilled, (state, action) => {
         state.loading = false;
         state.items = action.payload;
+        state.error = null; // Обновляем состояние error 
       })
       .addCase(fetchStories.rejected, (state, action) => {
         state.loading = false;
@@ -70,33 +71,41 @@ const storiesSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
+      .addCase(createStory.fulfilled, (state, action) => {
+        const newStory = action.payload;
+        const authorId = newStory.author.id;
+
+        // Ищем существующие сторис автора
+        const authorStoriesIndex = state.items.findIndex(item => item.author.id === authorId);
+
+        if (authorStoriesIndex !== -1) {
+          // Добавляем новую сторис в начало существующего автора
+          state.items[authorStoriesIndex].stories.unshift(newStory);
+        } else {
+          // Создаем новую группу для автора
+          state.items.unshift({
+            author: newStory.author,
+            stories: [newStory]
+          });
+        }
+        state.loading = false;
+        state.error = null;
+      })
       .addCase(viewStory.rejected, (state, action) => {
         state.error = action.payload;
       })
-      .addCase(createStory.fulfilled, (state, action) => {
-        // Добавляем новую сторис в начало соответствующего автора
-        const authorId = action.payload.author.id;
-        const authorStories = state.items.find(item => item.author.id === authorId);
-
-        if (authorStories) {
-          authorStories.stories.unshift(action.payload);
-        } else {
-          state.items.unshift({
-            author: action.payload.author,
-            stories: [action.payload]
-          });
-        }
-        state.loading = false;  // Обновляем состояние loading после создания сториса
-      })
       .addCase(viewStory.fulfilled, (state, action) => { // обработка события просмотра сториса
-        for (const item of state.items) {
-          const story = item.stories.find(story => story.id === action.payload.storyId);
+        const { storyId, views } = action.payload;
+
+        // Обновляем просмотры во всех сторис
+        state.items.forEach(item => {
+          const story = item.stories.find(story => story.id === storyId);
           if (story) {
-            story.views = action.payload.views;
-            break; // выход из цикла после обновления просмотра
+            story.views = views;
           }
-        }
-      })
+
+        })
+      });
   },
 });
 
