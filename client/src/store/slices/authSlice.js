@@ -1,17 +1,25 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { authService } from '../../services/authService';
 
+const handleAuthSuccess = (response) => { // Helper function to handle successful authentication
+  try {
+    localStorage.setItem('token', response.data.token);
+    localStorage.setItem('user', JSON.stringify(response.data.user));
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to save authentication data');
+}
+};
+
 // Async thunks
 export const registerUser = createAsyncThunk(
   'auth/register',
   async (userData, { rejectWithValue }) => {
     try {
       const response = await authService.register(userData);
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
-      return response.data;
+      return handleAuthSuccess(response);
     } catch (error) {
-      return rejectWithValue(error.response.data.message);
+      return rejectWithValue(error?.response?.data.message || 'Authentication failed');
     }
   }
 );
@@ -21,19 +29,26 @@ export const loginUser = createAsyncThunk(
   async (credentials, { rejectWithValue }) => {
     try {
       const response = await authService.login(credentials);
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
-      return response.data;
+      return handleAuthSuccess(response);
     } catch (error) {
-      return rejectWithValue(error.response.data.message);
+      return rejectWithValue(error?.response?.data.message || 'Authentication failed');
     }
   }
 );
 
-const authSlice = createSlice({
+const getStoredUser = () => { // Helper function to get stored user
+  try {
+    return JSON.parse(localStorage.getItem('user')) || null;
+
+  } catch {
+    return null;
+  }
+}
+
+const authSlice = createSlice({ 
   name: 'auth',
   initialState: {
-    user: JSON.parse(localStorage.getItem('user')) || null,
+    user: getStoredUser(),
     token: localStorage.getItem('token') || null,
     isAuthenticated: !!localStorage.getItem('token'),
     loading: false,
