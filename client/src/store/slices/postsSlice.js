@@ -37,6 +37,18 @@ export const likePost = createAsyncThunk(
   }
 );
 
+export const addComment = createAsyncThunk(
+  'posts/addComment',
+  async ({ postId, content }, { rejectWithValue }) => {
+    try {
+      const response = await postsService.addComment(postId, content);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data.message);
+    }
+  }
+);
+
 const postsSlice = createSlice({
   name: 'posts',
   initialState: {
@@ -73,6 +85,17 @@ const postsSlice = createSlice({
         if (index !== -1) {
           state.items[index] = action.payload.post;
         }
+      })
+      // Add comment
+      .addCase(addComment.fulfilled, (state, action) => {
+        const { postId, comment } = action.payload;
+        const postIndex = state.items.findIndex(post => post.id === postId);
+        if (postIndex !== -1) {
+          state.items[postIndex].comments.push(comment);
+        }
+      })
+      .addCase(addComment.rejected, (state, action) => {
+        state.error = action.payload;
       });
   },
 });
