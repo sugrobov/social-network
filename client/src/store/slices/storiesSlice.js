@@ -25,6 +25,19 @@ export const createStory = createAsyncThunk(
   }
 );
 
+export const viewStory = createAsyncThunk(
+  'stories/viewStory',
+  async (storyId, { rejectWithValue }) => {
+    try {
+      const response = await storiesService.viewStory(storyId);
+      return { storyId, views: response.data.views };
+    } catch (error) {
+      return rejectWithValue(error.response.data.message);
+    }
+  }
+);
+
+
 const storiesSlice = createSlice({
   name: 'stories',
   initialState: {
@@ -50,11 +63,21 @@ const storiesSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
+      .addCase(createStory.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(createStory.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(viewStory.rejected, (state, action) => {
+        state.error = action.payload;
+      })
       .addCase(createStory.fulfilled, (state, action) => {
         // Добавляем новую сторис в начало соответствующего автора
         const authorId = action.payload.author.id;
         const authorStories = state.items.find(item => item.author.id === authorId);
-        
+
         if (authorStories) {
           authorStories.stories.unshift(action.payload);
         } else {
@@ -63,9 +86,18 @@ const storiesSlice = createSlice({
             stories: [action.payload]
           });
         }
-      });
+        state.loading = false;  // Обновляем состояние loading после создания сториса
+      })
+      .addCase(viewStory.fulfilled, (state, action) => { // обработка события просмотра сториса
+        for (const item of state.items) {
+          const story = item.stories.find(story => story.id === action.payload.storyId);
+          if (story) {
+            story.views = action.payload.views;
+            break; // выход из цикла после обновления просмотра
+          }
+        }
+      })
   },
 });
 
-export const { clearError } = storiesSlice.actions;
 export default storiesSlice.reducer;
