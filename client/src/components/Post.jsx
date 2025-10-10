@@ -9,7 +9,6 @@ function Post({ post }) {
   const { user } = useSelector((state) => state.auth);
 
   const isLiked = post.likes.includes(user?.id);
-  const isAuthor = post.author.id === user?.id;
 
   const handleLike = async () => {
     try {
@@ -24,10 +23,10 @@ function Post({ post }) {
     if (!newComment.trim() || isSubmittingComment) return;
 
     setIsSubmittingComment(true);
-        try {
-      await dispatch(addComment({ 
-        postId: post.id, 
-        content: newComment 
+    try {
+      await dispatch(addComment({
+        postId: post.id,
+        content: newComment
       })).unwrap();
       setNewComment('');
     } catch (error) {
@@ -140,7 +139,7 @@ function Post({ post }) {
             />
             <button
               type="submit"
-              disabled={!newComment.trim()  || isSubmittingComment}
+              disabled={!newComment.trim() || isSubmittingComment}
               className="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600 disabled:opacity-50 transition-colors"
             >
               {isSubmittingComment ? '...' : 'Отправить'}
