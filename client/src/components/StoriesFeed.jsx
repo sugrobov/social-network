@@ -14,7 +14,6 @@ function StoriesFeed({ onStoryOpen }) {
   const dispatch = useDispatch();
   
   const { items: stories, loading, error } = useSelector(state => state.stories);
-  const currentUser = useSelector(state => state.user.currentUser);
   
   const refreshIntervalRef = useRef();
 
