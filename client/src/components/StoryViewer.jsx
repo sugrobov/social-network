@@ -58,7 +58,7 @@ function StoryViewer({ isOpen, onClose, stories }) {
 
   const markAsViewed = async () => {
     const currentUserId = JSON.parse(localStorage.getItem('user'))?.id;
-    if (currentStory && currentUserId && !currentStory.views.includes(currentStory.author.id)) {
+    if (currentStory && currentUserId && !currentStory.views.includes(currentUserId)) {
       try {
         await dispatch(viewStory(currentStory.id)).unwrap();
       } catch (error) {
