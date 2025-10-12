@@ -63,7 +63,7 @@ function PostCard({
             <div className="flex items-center p-4 border-b border-gray-200">
                 <div className="flex items-center space-x-3 flex-1">
                     <img
-                        src={postUser?.avatarUrl || '/default-avatar.png'}
+                        src={postUser?.avatar || postUser?.avatarUrl || '/default-avatar.png'}
                         alt={postUser?.firstName || 'User'}
                         className="w-10 h-10 rounded-full object-cover"
                     />
