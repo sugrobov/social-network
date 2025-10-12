@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Navigate } from 'react-router-dom';
-import { fetchPosts } from '../store/slices/postsSlice';
-import { fetchStories } from '../store/slices/storiesSlice';
-import CreatePost from './CreatePost';
-import Post from './Post';
-import StoriesFeed from './StoriesFeed';
+import { fetchPosts } from '../../../store/slices/postsSlice';
+import { fetchStories } from '../../../store/slices/storiesSlice';
+import CreatePost from '../../components/CreatePost';
+import Post from '../../components/Post';
+import StoriesFeed from '../../components/StoriesFeed';
 //** страница ленты */
 function Feed() {
   const dispatch = useDispatch();

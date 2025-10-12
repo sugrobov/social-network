@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
-import { fetchStories } from '../store/slices/storiesSlice';
+import { fetchStories } from '../../../store/slices/storiesSlice';
 
 // Константы
 const REFRESH_INTERVAL = 30000; // 30 секунд

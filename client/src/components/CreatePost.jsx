@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { createPost } from '../store/slices/postsSlice';
+import { createPost } from '../../../store/slices/postsSlice';
 
 // создание поста
 function CreatePost() {

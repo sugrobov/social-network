@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
-import { viewStory } from '../store/slices/storiesSlice';
+import { viewStory } from '../../../store/slices/storiesSlice';
 
 /** StoryViewer.jsx - компонент просмотра историй */
 function StoryViewer({ isOpen, onClose, stories }) {

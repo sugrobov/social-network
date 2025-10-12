@@ -1,6 +1,6 @@
 import React from 'react';
-import { cn } from '../utils/cn';
-import Button from './UI/Button';
+import { cn } from '../../utils/cn';
+import Button from '../../UI/Button';
 
 // PostCard.jsx - компонент для отображения карточки поста
 function PostCard({

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { likePost, addComment } from '../store/slices/postsSlice';
+import { likePost, addComment } from '../../../store/slices/postsSlice';
 
 function Post({ post }) {
   const [showComments, setShowComments] = useState(false);
