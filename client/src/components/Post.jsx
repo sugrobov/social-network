@@ -5,6 +5,8 @@ import { likePost, addComment } from '../store/slices/postsSlice';
 function Post({ post }) {
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState('');
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
 
