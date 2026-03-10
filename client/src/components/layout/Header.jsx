@@ -5,7 +5,7 @@ import { logout } from '../../store/slices/authSlice';
 
 
 function Header() {
-    const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -32,7 +32,7 @@ function Header() {
                   Профиль
                 </Link>
                 <span className="text-gray-600">
-                  Привет, {user?.firstName}!
+                  Привет, {user?.firstName || user?.lastName}!
                 </span>
                 <button
                   onClick={handleLogout}

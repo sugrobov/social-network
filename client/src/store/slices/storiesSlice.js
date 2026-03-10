@@ -1,11 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { storiesService } from '../../services/storiesService';
+import { storyService } from '../../services/storyService';
 
 export const fetchStories = createAsyncThunk(
   'stories/fetchStories',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await storiesService.getFeedStories();
+      const response = await storyService.getFeedStories();
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data.message);

@@ -1,27 +1,23 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Navigate } from 'react-router-dom';
-import { fetchPosts } from '../../../store/slices/postsSlice';
-import { fetchStories } from '../../../store/slices/storiesSlice';
+import { fetchPosts } from '../../store/slices/postsSlice';
+import { fetchStories } from '../../store/slices/storiesSlice';
 import CreatePost from '../../components/CreatePost';
 import Post from '../../components/Post';
 import StoriesFeed from '../../components/StoriesFeed';
+
 //** страница ленты */
 function Feed() {
   const dispatch = useDispatch();
-  const { isAuthenticated } = useSelector((state) => state.auth);
   const { items: posts, loading } = useSelector((state) => state.posts);
 
   useEffect(() => {
-    if (isAuthenticated) {
+
       dispatch(fetchPosts());
       dispatch(fetchStories());
-    }
-  }, [dispatch, isAuthenticated]);
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" />;
-  }
+  }, [dispatch]);
+
 
   return (
     <div className="max-w-2xl mx-auto">
