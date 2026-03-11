@@ -5,6 +5,7 @@ import { fetchStories } from '../../store/slices/storiesSlice';
 import CreatePost from '../../components/CreatePost';
 import Post from '../../components/Post';
 import StoriesFeed from '../../components/StoriesFeed';
+import ErrorBoundary from '../../components/ErrorBoundary';
 
 //** страница ленты */
 function Feed() {
