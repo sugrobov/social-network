@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { storyService } from '../../services/storyService';
+import { storyService } from '../../services/storyService'; // исправлено
 
 export const fetchStories = createAsyncThunk(
   'stories/fetchStories',
@@ -8,7 +8,7 @@ export const fetchStories = createAsyncThunk(
       const response = await storyService.getFeedStories();
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data.message);
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch stories');
     }
   }
 );
@@ -17,10 +17,10 @@ export const createStory = createAsyncThunk(
   'stories/createStory',
   async (storyData, { rejectWithValue }) => {
     try {
-      const response = await storiesService.createStory(storyData);
+      const response = await storyService.createStory(storyData); // исправлено
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data.message);
+      return rejectWithValue(error.response?.data?.message || 'Failed to create story');
     }
   }
 );
@@ -29,14 +29,13 @@ export const viewStory = createAsyncThunk(
   'stories/viewStory',
   async (storyId, { rejectWithValue }) => {
     try {
-      const response = await storiesService.viewStory(storyId);
-      return { storyId, views: response.data.views };
+      const response = await storyService.viewStory(storyId); // исправлено
+      return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data.message);
+      return rejectWithValue(error.response?.data?.message || 'Failed to mark story as viewed');
     }
   }
 );
-
 
 const storiesSlice = createSlice({
   name: 'stories',
@@ -54,11 +53,11 @@ const storiesSlice = createSlice({
     builder
       .addCase(fetchStories.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(fetchStories.fulfilled, (state, action) => {
         state.loading = false;
         state.items = action.payload;
-        state.error = null; // Обновляем состояние error 
       })
       .addCase(fetchStories.rejected, (state, action) => {
         state.loading = false;
@@ -66,45 +65,38 @@ const storiesSlice = createSlice({
       })
       .addCase(createStory.pending, (state) => {
         state.loading = true;
-      })
-      .addCase(createStory.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
+        state.error = null;
       })
       .addCase(createStory.fulfilled, (state, action) => {
         const newStory = action.payload;
         const authorId = newStory.author.id;
-
-        // Ищем существующие сторис автора
-        const authorStoriesIndex = state.items.findIndex(item => item.author.id === authorId);
-
-        if (authorStoriesIndex !== -1) {
-          // Добавляем новую сторис в начало существующего автора
-          state.items[authorStoriesIndex].stories.unshift(newStory);
+        const existingGroup = state.items.find(g => g.author.id === authorId);
+        if (existingGroup) {
+          existingGroup.stories.unshift(newStory);
         } else {
-          // Создаем новую группу для автора
           state.items.unshift({
             author: newStory.author,
             stories: [newStory]
           });
         }
         state.loading = false;
-        state.error = null;
+      })
+      .addCase(createStory.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(viewStory.fulfilled, (state, action) => {
+        const { storyId, views } = action.payload;
+        for (const group of state.items) {
+          const story = group.stories.find(s => s.id === storyId);
+          if (story) {
+            story.views = views;
+            break;
+          }
+        }
       })
       .addCase(viewStory.rejected, (state, action) => {
         state.error = action.payload;
-      })
-      .addCase(viewStory.fulfilled, (state, action) => { // обработка события просмотра сториса
-        const { storyId, views } = action.payload;
-
-        // Обновляем просмотры во всех сторис
-        state.items.forEach(item => {
-          const story = item.stories.find(story => story.id === storyId);
-          if (story) {
-            story.views = views;
-          }
-
-        })
       });
   },
 });

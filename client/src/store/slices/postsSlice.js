@@ -1,4 +1,3 @@
-// client/src/store/slices/postsSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { postsService } from '../../services/postsService';
 
@@ -31,7 +30,7 @@ export const likePost = createAsyncThunk(
   async (postId, { rejectWithValue }) => {
     try {
       const response = await postsService.likePost(postId);
-      return response.data;
+      return response.data; // { post }
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to like post');
     }
@@ -43,7 +42,7 @@ export const addComment = createAsyncThunk(
   async ({ postId, content }, { rejectWithValue }) => {
     try {
       const response = await postsService.addComment(postId, content);
-      return response.data;
+      return response.data; // { postId, comment }
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to add comment');
     }
@@ -64,7 +63,6 @@ const postsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Fetch posts
       .addCase(fetchPosts.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -77,46 +75,28 @@ const postsSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
-      // Create post 
       .addCase(createPost.fulfilled, (state, action) => {
-        // Добавляем автора из текущего пользователя, если его нет
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        const newPost = {
-          ...action.payload,
-          author: action.payload.author || {
-            id: user.id || 1,
-            firstName: user.firstName || 'Test',
-            lastName: user.lastName || 'User',
-            username: user.email?.split('@')[0] || 'testuser',
-            avatar: '/default-avatar.png'
-          },
-          likes: action.payload.likes || [],
-          comments: action.payload.comments || []
-        };
-        state.items.unshift(newPost);
+        state.items.unshift(action.payload);
       })
       .addCase(createPost.rejected, (state, action) => {
         state.error = action.payload;
       })
-      
-      // Like post
       .addCase(likePost.fulfilled, (state, action) => {
-        const index = state.items.findIndex(post => post.id === action.payload.post.id);
+        const updatedPost = action.payload.post;
+        const index = state.items.findIndex(p => p.id === updatedPost.id);
         if (index !== -1) {
-          state.items[index] = action.payload.post;
+          state.items[index] = updatedPost;
         }
       })
-      
-      // Add comment
+      .addCase(likePost.rejected, (state, action) => {
+        state.error = action.payload;
+      })
       .addCase(addComment.fulfilled, (state, action) => {
         const { postId, comment } = action.payload;
-        const postIndex = state.items.findIndex(post => post.id === postId);
-        if (postIndex !== -1) {
-          if (!state.items[postIndex].comments) {
-            state.items[postIndex].comments = [];
-          }
-          state.items[postIndex].comments.push(comment);
+        const post = state.items.find(p => p.id === postId);
+        if (post) {
+          if (!post.comments) post.comments = [];
+          post.comments.push(comment);
         }
       })
       .addCase(addComment.rejected, (state, action) => {

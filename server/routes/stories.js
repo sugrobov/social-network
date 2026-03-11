@@ -89,20 +89,15 @@ router.post('/:storyId/view', authenticateToken, async (req, res) => {
   try {
     const storyId = req.params.storyId;
     const story = stories.find(s => s.id === storyId);
-    
     if (!story) {
       return res.status(404).json({ message: 'Story not found' });
     }
 
-    // Проверяем, не просматривал ли уже пользователь
     if (!story.views.includes(req.user.id)) {
       story.views.push(req.user.id);
     }
 
-    res.json({ 
-      message: 'Story viewed', 
-      views: story.views.length 
-    });
+    res.json({ storyId, views: story.views });
   } catch (error) {
     res.status(500).json({ message: 'Error viewing story', error: error.message });
   }

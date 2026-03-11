@@ -78,26 +78,18 @@ router.post('/:id/like', authenticateToken, async (req, res) => {
   try {
     const postId = req.params.id;
     const post = posts.find(p => p.id === postId);
-    
     if (!post) {
       return res.status(404).json({ message: 'Post not found' });
     }
 
     const likeIndex = post.likes.indexOf(req.user.id);
-    
     if (likeIndex > -1) {
-      // Unlike
       post.likes.splice(likeIndex, 1);
     } else {
-      // Like
       post.likes.push(req.user.id);
     }
 
-    res.json({
-      post,
-      liked: likeIndex === -1,
-      likesCount: post.likes.length
-    });
+    res.json({ post });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
@@ -108,7 +100,7 @@ router.post('/:id/comments', authenticateToken, async (req, res) => {
   try {
     const postId = req.params.id;
     const { content } = req.body;
-    
+
     const post = posts.find(p => p.id === postId);
     if (!post) {
       return res.status(404).json({ message: 'Post not found' });
@@ -128,8 +120,7 @@ router.post('/:id/comments', authenticateToken, async (req, res) => {
     };
 
     post.comments.push(comment);
-
-    res.status(201).json(comment);
+    res.status(201).json({ postId, comment });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
