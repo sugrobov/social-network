@@ -13,8 +13,8 @@ function Feed() {
 
   useEffect(() => {
 
-      dispatch(fetchPosts());
-      dispatch(fetchStories());
+    dispatch(fetchPosts());
+    dispatch(fetchStories());
 
   }, [dispatch]);
 
@@ -36,7 +36,8 @@ function Feed() {
       ) : posts.length > 0 ? (
         <div>
           {posts.map((post) => (
-            <Post key={post.id} post={post} />
+            <ErrorBoundary key={post.id}><Post key={post.id} post={post} /></ErrorBoundary>
+
           ))}
         </div>
       ) : (

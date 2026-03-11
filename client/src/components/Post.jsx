@@ -10,11 +10,33 @@ function Post({ post }) {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
 
-  const isLiked = post.likes.includes(user?.id);
+  // 🛡️ Защита от отсутствующего post или author
+  if (!post) {
+    return null; // или можно вернуть заглушку
+  }
+
+  // Безопасные значения по умолчанию
+  const safePost = {
+    id: post.id || 0,
+    content: post.content || '',
+    image: post.image || null,
+    createdAt: post.createdAt || new Date().toISOString(),
+    likes: post.likes || [],
+    comments: post.comments || [],
+    author: post.author || {
+      id: 0,
+      firstName: 'Пользователь',
+      lastName: '',
+      username: 'user',
+      avatar: '/default-avatar.png'
+    }
+  };
+
+  const isLiked = safePost.likes.includes(user?.id);
 
   const handleLike = async () => {
     try {
-      await dispatch(likePost(post.id)).unwrap();
+      await dispatch(likePost(safePost.id)).unwrap();
     } catch (error) {
       console.error('Error liking post:', error);
     }
@@ -27,7 +49,7 @@ function Post({ post }) {
     setIsSubmittingComment(true);
     try {
       await dispatch(addComment({
-        postId: post.id,
+        postId: safePost.id,
         content: newComment
       })).unwrap();
       setNewComment('');
@@ -39,7 +61,11 @@ function Post({ post }) {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleString('ru-RU');
+    try {
+      return new Date(dateString).toLocaleString('ru-RU');
+    } catch {
+      return '';
+    }
   };
 
   return (
@@ -48,28 +74,28 @@ function Post({ post }) {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-3">
           <img
-            src={post.author.avatar || '/default-avatar.png'}
-            alt={post.author.username}
+            src={safePost.author.avatar || '/default-avatar.png'}
+            alt={safePost.author.username}
             className="w-10 h-10 rounded-full object-cover"
           />
           <div>
             <h3 className="font-semibold text-gray-900">
-              {post.author.firstName} {post.author.lastName}
+              {safePost.author.firstName} {safePost.author.lastName}
             </h3>
-            <p className="text-sm text-gray-500">@{post.author.username}</p>
+            <p className="text-sm text-gray-500">@{safePost.author.username}</p>
           </div>
         </div>
         <span className="text-sm text-gray-500">
-          {formatDate(post.createdAt)}
+          {formatDate(safePost.createdAt)}
         </span>
       </div>
 
       {/* Контент поста */}
       <div className="mb-4">
-        <p className="text-gray-800 whitespace-pre-wrap">{post.content}</p>
-        {post.image && (
+        <p className="text-gray-800 whitespace-pre-wrap">{safePost.content}</p>
+        {safePost.image && (
           <img
-            src={`http://localhost:5000${post.image}`}
+            src={`http://localhost:5000${safePost.image}`}
             alt="Post media"
             className="mt-3 rounded-lg max-w-full h-auto"
           />
@@ -78,16 +104,17 @@ function Post({ post }) {
 
       {/* Статистика */}
       <div className="flex items-center text-sm text-gray-500 mb-3">
-        <span className="mr-4">{post.likes.length} лайков</span>
-        <span>{post.comments.length} комментариев</span>
+        <span className="mr-4">{safePost.likes.length} лайков</span>
+        <span>{safePost.comments.length} комментариев</span>
       </div>
 
       {/* Действия */}
       <div className="flex border-t border-b border-gray-200 py-2">
         <button
           onClick={handleLike}
-          className={`flex-1 flex items-center justify-center py-2 rounded-lg transition-colors ${isLiked ? 'text-red-500 hover:text-red-600' : 'text-gray-500 hover:text-gray-700'
-            }`}
+          className={`flex-1 flex items-center justify-center py-2 rounded-lg transition-colors ${
+            isLiked ? 'text-red-500 hover:text-red-600' : 'text-gray-500 hover:text-gray-700'
+          }`}
         >
           <span className="text-lg mr-2">❤️</span>
           {isLiked ? 'Не нравится' : 'Нравится'}
@@ -105,9 +132,9 @@ function Post({ post }) {
       {showComments && (
         <div className="mt-4">
           {/* Список комментариев */}
-          {post.comments.length > 0 && (
+          {safePost.comments.length > 0 && (
             <div className="space-y-3 mb-4">
-              {post.comments.map((comment) => (
+              {safePost.comments.map((comment) => (
                 <div key={comment.id} className="flex space-x-3">
                   <img
                     src={comment.author?.avatar || '/default-avatar.png'}

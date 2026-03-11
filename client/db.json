@@ -1,0 +1,89 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "email": "test@test.com",
+      "password": "123456",
+      "firstName": "Test",
+      "lastName": "User"
+    },
+    {
+      "id": 1773230751756,
+      "email": "aqualand2018@gmail.com",
+      "password": "1234567",
+      "firstName": "Николай",
+      "lastName": "Сугробов"
+    }
+  ],
+  "posts": [
+    {
+      "id": 1,
+      "content": "Привет! Это первый пост в нашей социальной сети!",
+      "author": {
+        "id": 1,
+        "firstName": "Test",
+        "lastName": "User",
+        "username": "testuser",
+        "avatar": "/default-avatar.png"
+      },
+      "createdAt": "2024-03-11T10:00:00.000Z",
+      "likes": [],
+      "comments": [
+        {
+          "id": 1,
+          "content": "Отличный пост!",
+          "author": {
+            "id": 1,
+            "firstName": "Test",
+            "lastName": "User",
+            "username": "testuser",
+            "avatar": "/default-avatar.png"
+          },
+          "createdAt": "2024-03-11T10:05:00.000Z"
+        }
+      ]
+    },
+    {
+      "id": 1773230930741,
+      "content": "вавапвап",
+      "createdAt": "2026-03-11T12:08:50.741Z",
+      "likes": [],
+      "comments": []
+    },
+    {
+      "id": 1773232593879,
+      "content": "ене",
+      "createdAt": "2026-03-11T12:36:33.879Z",
+      "likes": [],
+      "comments": []
+    },
+    {
+      "id": 1773232601591,
+      "content": "роророрр",
+      "createdAt": "2026-03-11T12:36:41.591Z",
+      "likes": [],
+      "comments": []
+    }
+  ],
+  "stories": [
+    {
+      "author": {
+        "id": 1,
+        "firstName": "Test",
+        "lastName": "User",
+        "username": "testuser",
+        "avatar": "/default-avatar.png"
+      },
+      "stories": [
+        {
+          "id": 1,
+          "content": "Моя первая история!",
+          "backgroundColor": "#833ab4",
+          "textColor": "#ffffff",
+          "createdAt": "2024-03-11T09:00:00.000Z",
+          "views": []
+        }
+      ]
+    }
+  ]
+}
