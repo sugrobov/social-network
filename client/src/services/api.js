@@ -1,4 +1,5 @@
 import axios from 'axios';
+import storage from './storage'; './storage'
 
 const API_BASE_URL = 'http://localhost:5000/api';
 
@@ -7,8 +8,8 @@ const api = axios.create({
 });
 
 // Добавляем токен к каждому запросу
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+api.interceptors.request.use(async (config) => {
+  const token = await storage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

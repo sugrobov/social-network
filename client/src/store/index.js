@@ -3,13 +3,15 @@ import authReducer from './slices/authSlice';
 import postsReducer from './slices/postsSlice';
 import storiesReducer from './slices/storiesSlice';
 
-const store = configureStore({
-  reducer: {
-    auth: authReducer,
-    posts: postsReducer,
-    stories: storiesReducer,
-  },
-});
-
-export default store;
+const createStore = (preloadedState) => {
+  return configureStore({
+    reducer: {
+      auth: authReducer,
+      posts: postsReducer,
+      stories: storiesReducer,
+    },
+    preloadedState,
+  });
+};
+export default createStore;
 

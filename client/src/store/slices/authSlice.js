@@ -1,14 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { authService } from '../../services/authService';
+import storage from '../../services/storage';
 
-const handleAuthSuccess = (response) => { // Helper function to handle successful authentication
-  try {
-    localStorage.setItem('token', response.data.token);
-    localStorage.setItem('user', JSON.stringify(response.data.user));
-    return response.data;
-  } catch (error) {
-    throw new Error('Failed to save authentication data');
-}
+// Вспомогательная функция сохранения данных (теперь асинхронная)
+const saveAuthData = async (data) => {
+  await storage.setItem('token', data.token);
+  await storage.setItem('user', JSON.stringify(data.user));
+  return data;
 };
 
 // Async thunks
@@ -17,9 +15,9 @@ export const registerUser = createAsyncThunk(
   async (userData, { rejectWithValue }) => {
     try {
       const response = await authService.register(userData);
-      return handleAuthSuccess(response);
+      return await saveAuthData(response.data);
     } catch (error) {
-      return rejectWithValue(error?.response?.data.message || 'Authentication failed');
+      return rejectWithValue(error.response?.data?.message || 'Registration failed');
     }
   }
 );
@@ -29,38 +27,31 @@ export const loginUser = createAsyncThunk(
   async (credentials, { rejectWithValue }) => {
     try {
       const response = await authService.login(credentials);
-      return handleAuthSuccess(response);
+      return await saveAuthData(response.data);
     } catch (error) {
-      return rejectWithValue(error?.response?.data.message || 'Authentication failed');
+      return rejectWithValue(error.response?.data?.message || 'Login failed');
     }
   }
 );
 
-const getStoredUser = () => { // Helper function to get stored user
-  try {
-    return JSON.parse(localStorage.getItem('user')) || null;
-
-  } catch {
-    return null;
-  }
-}
-
-const authSlice = createSlice({ 
+const authSlice = createSlice({
   name: 'auth',
   initialState: {
-    user: getStoredUser(),
-    token: localStorage.getItem('token') || null,
-    isAuthenticated: !!localStorage.getItem('token'),
+    user: null,
+    token: null,
+    isAuthenticated: false,
     loading: false,
     error: null,
   },
   reducers: {
     logout: (state) => {
+      // Очищаем состояние синхронно, а хранилище асинхронно (но это не страшно)
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      // Удаляем из хранилища (асинхронно, не блокируем редьюсер)
+      storage.removeItem('token');
+      storage.removeItem('user');
     },
     clearError: (state) => {
       state.error = null;
@@ -68,7 +59,6 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Register
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -83,7 +73,6 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      // Login
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
