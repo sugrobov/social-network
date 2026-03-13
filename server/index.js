@@ -29,9 +29,18 @@ const PORT = process.env.PORT || 5000;
 
 app.use(helmet());
 
+// явно разрешаем запросы с адреса клиента http://localhost:5173
+const corsOptions = {
+  origin: 'http://localhost:5173', // разрешаем только наш клиент
+  credentials: true, // разрешаем передачу кук и заголовков авторизации
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
+
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 500, // ограничиваем максимальное количество запросов
   message: 'Too many requests from this IP, please try again later.',
 });
 app.use(limiter);
