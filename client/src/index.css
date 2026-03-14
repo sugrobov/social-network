@@ -1,1 +1,33 @@
 @import "tailwindcss";
+
+/* Плавный скролл для всей страницы */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Адаптация контейнера для мобильных */
+@media (max-width: 640px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Анимация для бургер-меню */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}

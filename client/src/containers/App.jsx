@@ -7,6 +7,7 @@ import PrivateRoute from "../components/PrivateRoute";
 
 function App() {
   return (
+
     <BrowserRouter
       future={{
         v7_startTransition: true,
@@ -15,7 +16,8 @@ function App() {
     >
       <div className="min-h-screen bg-gray-50">
         <Header />
-        <main className="container mx-auto px-4 py-8">
+        {/* Отступ для фиксированного Header */}
+        <main className="container mx-auto px-4 pt-20 pb-8">
           <Routes>
             <Route path="/" element={<Navigate to="/feed" replace />} />
             <Route path="/login" element={<Login />} />
@@ -32,7 +34,12 @@ function App() {
               path="/profile"
               element={
                 <PrivateRoute>
-                  <div>Profile Page (soon)</div>
+                  <div className="bg-white p-6 rounded-lg shadow-md text-center">
+                    <h2 className="text-xl font-semibold text-gray-800 mb-2">
+                      Профиль пользователя
+                    </h2>
+                    <p className="text-gray-600">Страница в разработке</p>
+                  </div>
                 </PrivateRoute>
               }
             />
@@ -40,6 +47,7 @@ function App() {
         </main>
       </div>
     </BrowserRouter>
+
   );
 }
 
