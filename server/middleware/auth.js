@@ -21,13 +21,34 @@ export const authenticateToken = (req, res, next) => {
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
-      avatar: user.avatar,
+      avatar: user.avatar  || '',
       bio: user.bio || '',
       createdAt: user.createdAt
     };
 
     next();
   } catch (error) {
-    return res.status(401).json({ message: 'Invalid token.' });
+     // Детальная обработка разных типов ошибок JWT
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ 
+        message: 'Token expired.',
+        code: 'TOKEN_EXPIRED' 
+      });
+    }
+    
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ 
+        message: 'Invalid token.',
+        code: 'INVALID_TOKEN' 
+      });
+    }
+    
+    // Любая другая ошибка
+    console.error('Auth middleware error:', error);
+    return res.status(500).json({ 
+      message: 'Authentication failed.',
+      code: 'AUTH_FAILED'
+    });
+  
   }
 };

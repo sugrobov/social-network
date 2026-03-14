@@ -45,7 +45,6 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-app.use(cors());
 app.use(express.json());
 
 // Раздача статики (исправлено: /uploads)
