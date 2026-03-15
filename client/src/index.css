@@ -3,6 +3,22 @@
 /* Плавный скролл для всей страницы */
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
+  width: 100%;
+}
+
+body {
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
+}
+
+/* Глобальный контейнер для всего контента */
+#root {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 /* Адаптация контейнера для мобильных */
@@ -10,7 +26,28 @@ html {
   .container {
     padding-left: 1rem;
     padding-right: 1rem;
+    width: 100%;
+    overflow-x: hidden;
   }
+}
+
+/* Для всех элементов, чтобы не выходили за пределы */
+img, video, iframe, svg, canvas, textarea, input, button, a, div, section, article, main, header, footer {
+  max-width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Специально для текста */
+p, h1, h2, h3, h4, h5, h6, span, a, li, td, th {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+/* Для контейнеров с flex, чтобы не создавали горизонтальный скролл */
+.flex {
+  min-width: 0;
 }
 
 /* Анимация для бургер-меню */

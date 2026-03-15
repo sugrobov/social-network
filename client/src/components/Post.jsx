@@ -70,30 +70,33 @@ function Post({ post }) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+    <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-4 w-full overflow-hidden">
       {/* Заголовок поста */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-3">
-          <Avatar user={safePost.author} size="md" />
-          <div>
-            <h3 className="font-semibold text-gray-900">
-              {safePost.author.firstName} {safePost.author.lastName}
-            </h3>
-            <p className="text-sm text-gray-500">@{safePost.author.username}</p>
-          </div>
-        </div>
-        <span className="text-sm text-gray-500">
-          {formatDate(safePost.createdAt)}
-        </span>
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-2"> 
+    <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1"> 
+      <Avatar user={safePost.author} size="sm" className="flex-shrink-0" />
+      <div className="min-w-0"> 
+        <h3 className="font-semibold text-gray-900 truncate"> 
+          {safePost.author.firstName} {safePost.author.lastName}
+        </h3>
+        <p className="text-sm text-gray-500 truncate">@{safePost.author.username}</p> 
       </div>
+    </div>
+    <span className="text-sm text-gray-500 whitespace-nowrap"> 
+      {formatDate(safePost.createdAt)}
+    </span>
+  </div>
 
       {/* Контент поста */}
-      <div className="mb-4">
-        <p className="text-gray-800 whitespace-pre-wrap">{safePost.content}</p>
-        {safePost.image && (
-          <Avatar user={safePost.author} size="md" />
-        )}
-      </div>
+  <div className="mb-4">
+    <p className="text-gray-800 whitespace-pre-wrap break-words">{safePost.content}</p>
+    {safePost.image && (
+      <img
+        src={`http://localhost:5000${safePost.image}`}
+        alt="Post media"
+        className="mt-3 rounded-lg w-full h-auto max-h-96 object-contain" />
+    )}
+  </div>
 
       {/* Статистика */}
       <div className="flex items-center text-sm text-gray-500 mb-3">

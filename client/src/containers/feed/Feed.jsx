@@ -17,7 +17,7 @@ function Feed() {
   }, [dispatch]);
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="w-full max-w-3xl mx-auto"> 
       <StoriesFeed />
       <CreatePost />
       {loading ? (
@@ -26,7 +26,7 @@ function Feed() {
           <p className="mt-2 text-gray-600">Загрузка постов...</p>
         </div>
       ) : posts.length > 0 ? (
-        <div>
+        <div className="space-y-4">
           {posts.map((post) => (
             <ErrorBoundary key={post.id}>
               <Post post={post} />

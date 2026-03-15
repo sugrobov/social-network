@@ -33,8 +33,8 @@ function StoriesFeed({ onStoryOpen }) {
   if (!stories.length) return null;
 
   return (
-    <div className="bg-white rounded-lg shadow p-4 mb-6 overflow-x-auto">
-      <div className="flex space-x-4">
+    <div className="bg-white rounded-lg shadow p-3 sm:p-4 mb-6 overflow-x-auto w-full">
+      <div className="flex space-x-3 sm:space-x-4 min-w-min">
         {stories.map((group) => (
           <div
             key={group.author.id}
@@ -42,9 +42,9 @@ function StoriesFeed({ onStoryOpen }) {
             onClick={() => onStoryOpen?.(group)}
           >
             <div className="relative">
-              <Avatar user={group.author} size="md" />
+              <Avatar user={group.author} size="sm" />
             </div>
-            <p className="text-sm mt-1 max-w-[80px] truncate">
+            <p className="text-sm mt-1 max-w-[70px] truncate">
               {group.author.firstName}
             </p>
           </div>
