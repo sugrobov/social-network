@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { viewStory } from '../store/slices/storiesSlice';
+import Avatar from '../components/UI/Avatar';
 
 const STORY_DURATION = 10000; // 10 сек
 const PROGRESS_INTERVAL = 50;
@@ -127,11 +128,7 @@ function StoryViewer({ isOpen, onClose, stories }) {
 
         {/* Информация об авторе */}
         <div className="absolute top-6 left-6 flex items-center space-x-3 text-white">
-          <img
-            src={stories.author.avatar || '/default-avatar.png'}
-            alt="author"
-            className="w-10 h-10 rounded-full border-2 border-white"
-          />
+          <Avatar user={stories.author} size="md" />
           <div>
             <p className="font-semibold">{stories.author.firstName} {stories.author.lastName}</p>
             <p className="text-sm opacity-90">{new Date(currentStory.createdAt).toLocaleTimeString()}</p>

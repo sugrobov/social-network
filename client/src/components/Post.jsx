@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { likePost, addComment } from '../store/slices/postsSlice';
+import Avatar from './UI/Avatar';
 
 function Post({ post }) {
   const [showComments, setShowComments] = useState(false);
@@ -73,11 +74,7 @@ function Post({ post }) {
       {/* Заголовок поста */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-3">
-          <img
-            src={safePost.author.avatar || '/default-avatar.png'}
-            alt={safePost.author.username}
-            className="w-10 h-10 rounded-full object-cover"
-          />
+          <Avatar user={safePost.author} size="md" />
           <div>
             <h3 className="font-semibold text-gray-900">
               {safePost.author.firstName} {safePost.author.lastName}
@@ -94,11 +91,7 @@ function Post({ post }) {
       <div className="mb-4">
         <p className="text-gray-800 whitespace-pre-wrap">{safePost.content}</p>
         {safePost.image && (
-          <img
-            src={`http://localhost:5000${safePost.image}`}
-            alt="Post media"
-            className="mt-3 rounded-lg max-w-full h-auto"
-          />
+          <Avatar user={safePost.author} size="md" />
         )}
       </div>
 
@@ -112,9 +105,8 @@ function Post({ post }) {
       <div className="flex border-t border-b border-gray-200 py-2">
         <button
           onClick={handleLike}
-          className={`flex-1 flex items-center justify-center py-2 rounded-lg transition-colors ${
-            isLiked ? 'text-red-500 hover:text-red-600' : 'text-gray-500 hover:text-gray-700'
-          }`}
+          className={`flex-1 flex items-center justify-center py-2 rounded-lg transition-colors ${isLiked ? 'text-red-500 hover:text-red-600' : 'text-gray-500 hover:text-gray-700'
+            }`}
         >
           <span className="text-lg mr-2">❤️</span>
           {isLiked ? 'Не нравится' : 'Нравится'}
@@ -136,11 +128,7 @@ function Post({ post }) {
             <div className="space-y-3 mb-4">
               {safePost.comments.map((comment) => (
                 <div key={comment.id} className="flex space-x-3">
-                  <img
-                    src={comment.author?.avatar || '/default-avatar.png'}
-                    alt={comment.author?.username}
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
+                  <Avatar user={comment.author} size="sm" />  {/* 👈 ИСПРАВЛЕНО */}
                   <div className="flex-1">
                     <div className="bg-gray-100 rounded-lg px-4 py-2">
                       <p className="font-semibold text-sm">

@@ -1,4 +1,3 @@
-import React from 'react';
 import api from './api';
 
 // postsService.js - contains functions for interacting with posts

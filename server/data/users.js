@@ -8,7 +8,7 @@ export const users = [
     password: bcrypt.hashSync('123456', 12), // хеш пароля 123456
     firstName: 'Test',
     lastName: 'User',
-    avatar: '/uploads/default-avatar.png',
+    avatar: null,
     bio: 'Test user bio',
     createdAt: new Date('2024-01-01')
   }

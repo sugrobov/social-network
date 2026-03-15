@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchStories } from '../store/slices/storiesSlice';
+import Avatar from './UI/Avatar';
 
 function StoriesFeed({ onStoryOpen }) {
   const dispatch = useDispatch();
@@ -41,13 +42,7 @@ function StoriesFeed({ onStoryOpen }) {
             onClick={() => onStoryOpen?.(group)}
           >
             <div className="relative">
-              <img
-                src={group.author.avatar || '/default-avatar.png'}
-                alt={group.author.username}
-                className={`w-16 h-16 rounded-full border-2 ${
-                  hasUnviewed(group) ? 'border-blue-500' : 'border-gray-300'
-                } object-cover`}
-              />
+              <Avatar user={group.author} size="md" />
             </div>
             <p className="text-sm mt-1 max-w-[80px] truncate">
               {group.author.firstName}

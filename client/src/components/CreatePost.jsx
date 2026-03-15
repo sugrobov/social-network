@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createPost } from '../store/slices/postsSlice';
+import Avatar from './UI/Avatar';
 
 // создание поста
 function CreatePost() {
@@ -8,6 +9,8 @@ function CreatePost() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const dispatch = useDispatch();
     const { user } = useSelector((state) => state.auth);
+
+    // console.log('CreatePost user:', user);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -27,11 +30,7 @@ function CreatePost() {
     return (
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <div className="flex items-start space-x-4">
-                <img
-                    src={user?.avatar || '/default-avatar.png'}
-                    alt={user?.firstName}
-                    className="w-12 h-12 rounded-full object-cover"
-                />
+                <Avatar user={user} size="md" />
                 <form onSubmit={handleSubmit} className="flex-1">
                     <textarea
                         value={content}

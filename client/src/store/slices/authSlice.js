@@ -50,6 +50,7 @@ const authSlice = createSlice({
       state.token = null;
       state.isAuthenticated = false;
       // Удаляем из хранилища (асинхронно, не блокируем редьюсер)
+      // подумать: использовать асинхронный thunk для logout ???
       storage.removeItem('token');
       storage.removeItem('user');
     },

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import storage from './storage'; './storage'
+import storage from './storage'; 
 
 const API_BASE_URL = 'http://localhost:5000/api';
 
@@ -26,8 +26,8 @@ api.interceptors.response.use(
       // Очищаем хранилище
       await storage.removeItem('token');
       await storage.removeItem('user');
-      await storage.removeItem('posts');
-      await storage.removeItem('stories');
+      // await storage.removeItem('posts');  // ключи не были установлены, убираем
+      // await storage.removeItem('stories');
       // Перенаправляем на страницу входа
       window.location.href = '/login';
     }

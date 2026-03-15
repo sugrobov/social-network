@@ -1,6 +1,7 @@
 import React from 'react';
 import { cn } from '../../utils/cn';
 import Button from '../../UI/Button';
+import Avatar from '../components/UI/Avatar';
 
 // PostCard.jsx - компонент для отображения карточки поста
 function PostCard({
@@ -62,11 +63,7 @@ function PostCard({
             {/* Header */}
             <div className="flex items-center p-4 border-b border-gray-200">
                 <div className="flex items-center space-x-3 flex-1">
-                    <img
-                        src={postUser?.avatar || postUser?.avatarUrl || '/default-avatar.png'}
-                        alt={postUser?.firstName || 'User'}
-                        className="w-10 h-10 rounded-full object-cover"
-                    />
+                    <Avatar user={postUser} size="md" />
                     <div>
                         <h3 className="font-semibold text-gray-900">
                             {postUser?.firstName} {postUser?.lastName}
@@ -104,6 +101,7 @@ function PostCard({
             </div>
 
             {/* Content */}
+            {/* Content */}
             <div className={cn("p-4", contentClassName)}>
                 {title && (
                     <h2 className="text-xl font-bold text-gray-900 mb-2">{title}</h2>
@@ -117,7 +115,7 @@ function PostCard({
                     <div className="mb-4">
                         <img
                             src={imageUrl}
-                            alt={title}
+                            alt={title || 'Post image'}
                             className={cn("w-full h-auto rounded-lg object-cover max-h-96", imageClassName)}
                         />
                     </div>
