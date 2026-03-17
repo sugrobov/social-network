@@ -184,4 +184,44 @@ router.get('/', authenticateToken, async (req, res) => {
   }
 });
 
+/**
+ * GET /api/users/:userId/posts - получить посты пользователя
+ */
+router.get('/:userId/posts', authenticateToken, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    // Здесь должна быть логика получения постов из БД
+    // Пока используем мок-данные из posts.js
+    
+    // Импортируем posts (в реальном проекте здесь будет запрос к БД)
+    const { posts } = await import('../data/posts.js');
+    
+    // Фильтруем посты по автору
+    const userPosts = posts.filter(post => post.author.id === userId);
+    
+    res.json(userPosts);
+  } catch (error) {
+    console.error('Error fetching user posts:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+/**
+ * DELETE /api/posts/:postId - удалить пост (для владельца)
+ */
+router.delete('/posts/:postId', authenticateToken, async (req, res) => {
+  try {
+    const { postId } = req.params;
+    
+    // Здесь логика удаления поста из БД
+    // Проверяем, что пост принадлежит текущему пользователю
+    
+    res.json({ message: 'Post deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting post:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
 export default router;

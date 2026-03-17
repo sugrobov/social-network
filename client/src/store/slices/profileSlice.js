@@ -17,8 +17,8 @@ export const fetchUserPosts = createAsyncThunk(
   'profile/fetchUserPosts',
   async (userId, { rejectWithValue }) => {
     try {
-      // TODO: создать эндпоинт на сервере /api/users/:userId/posts
-      const response = await api.get(`/posts?authorId=${userId}`);
+      // Используем новый эндпоинт
+      const response = await api.get(`/users/${userId}/posts`);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to load posts');
@@ -50,6 +50,18 @@ export const uploadAvatar = createAsyncThunk(
       return response.data.avatar;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to upload avatar');
+    }
+  }
+);
+
+export const deleteUserPost = createAsyncThunk(
+  'profile/deleteUserPost',
+  async (postId, { rejectWithValue }) => {
+    try {
+      await api.delete(`/users/posts/${postId}`);
+      return postId;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to delete post');
     }
   }
 );
@@ -92,6 +104,10 @@ const profileSlice = createSlice({
       .addCase(fetchUserPosts.fulfilled, (state, action) => {
         state.loading = false;
         state.posts = action.payload;
+        // Обновляем счётчик постов в профиле, если есть
+        if (state.profile) {
+          state.profile.postsCount = action.payload.length;
+        }
       })
       .addCase(fetchUserPosts.rejected, (state, action) => {
         state.loading = false;
@@ -105,6 +121,13 @@ const profileSlice = createSlice({
       .addCase(uploadAvatar.fulfilled, (state, action) => {
         if (state.profile) {
           state.profile.avatar = action.payload;
+        }
+      })
+      // Delete post
+      .addCase(deleteUserPost.fulfilled, (state, action) => {
+        state.posts = state.posts.filter(post => post.id !== action.payload);
+        if (state.profile) {
+          state.profile.postsCount = state.posts.length;
         }
       });
   },

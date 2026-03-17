@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
-import { fetchUserProfile, fetchUserPosts } from '../../store/slices/profileSlice';
+import { fetchUserProfile, fetchUserPosts, deleteUserPost } from '../../store/slices/profileSlice';
 import Avatar from '../../components/UI/Avatar';
 import Button from '../../components/UI/Button';
 import Post from '../../components/Post';
@@ -9,10 +9,10 @@ import LoadingSpinner from '../../components/UI/LoadingSpinner';
 import Tabs from '../../components/UI/Tabs';
 
 function Profile() {
-  const { userId } = useParams(); // для просмотра чужого профиля
+  const { userId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  
+
   const { user: currentUser } = useSelector((state) => state.auth);
   const { profile, posts, loading, error } = useSelector((state) => state.profile);
   const [activeTab, setActiveTab] = useState('posts');
@@ -21,13 +21,26 @@ function Profile() {
   const profileUser = isOwnProfile ? currentUser : profile;
 
   useEffect(() => {
-    if (!isOwnProfile && userId) {
+    if (userId) {
       dispatch(fetchUserProfile(userId));
       dispatch(fetchUserPosts(userId));
+    } else if (currentUser) {
+      // Для своего профиля загружаем посты текущего пользователя
+      dispatch(fetchUserPosts(currentUser.id));
     }
-  }, [userId, isOwnProfile, dispatch]);
+  }, [userId, currentUser, dispatch]);
 
-  if (loading && !profileUser) {
+  const handleDeletePost = async (postId) => {
+    if (window.confirm('Удалить пост?')) {
+      try {
+        await dispatch(deleteUserPost(postId)).unwrap();
+      } catch (error) {
+        alert('Ошибка при удалении поста');
+      }
+    }
+  };
+
+  if (loading && !profileUser && !posts.length) {
     return <LoadingSpinner />;
   }
 
@@ -43,7 +56,7 @@ function Profile() {
   }
 
   const tabs = [
-    { id: 'posts', label: 'Посты', count: posts?.length },
+    { id: 'posts', label: 'Посты', count: posts?.length || 0 },
     { id: 'media', label: 'Медиа' },
     { id: 'likes', label: 'Лайки' },
   ];
@@ -54,7 +67,7 @@ function Profile() {
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
           <Avatar user={profileUser} size="xl" className="flex-shrink-0" />
-          
+
           <div className="flex-1 text-center sm:text-left">
             <div className="flex flex-col sm:flex-row items-center sm:items-center gap-4 mb-4">
               <h1 className="text-2xl font-bold text-gray-900">
@@ -69,7 +82,7 @@ function Profile() {
 
             <div className="flex justify-center sm:justify-start space-x-6 mb-4">
               <div className="text-center">
-                <span className="block font-bold text-xl">{profileUser?.postsCount || 0}</span>
+                <span className="block font-bold text-xl">{posts?.length || 0}</span>
                 <span className="text-gray-500 text-sm">постов</span>
               </div>
               <div className="text-center">
@@ -112,10 +125,26 @@ function Profile() {
         {activeTab === 'posts' && (
           <div className="space-y-4">
             {posts?.length > 0 ? (
-              posts.map((post) => <Post key={post.id} post={post} />)
+              posts.map((post) => (
+                <Post
+                  key={post.id}
+                  post={post}
+                  showDelete={isOwnProfile}
+                  onDelete={handleDeletePost}
+                />
+              ))
             ) : (
               <div className="text-center py-12 bg-white rounded-lg shadow-md">
                 <p className="text-gray-500 text-lg">У пользователя пока нет постов</p>
+                {isOwnProfile && (
+                  <Button
+                    onClick={() => navigate('/feed')}
+                    variant="primary"
+                    className="mt-4"
+                  >
+                    Создать первый пост
+                  </Button>
+                )}
               </div>
             )}
           </div>
