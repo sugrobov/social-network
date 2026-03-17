@@ -5,6 +5,7 @@ import Login from "./auth/Login";
 import Feed from "./feed/Feed";
 import PrivateRoute from "../components/PrivateRoute";
 import Profile from "./profile/Profile";
+import EditProfile from "./profile/EditProfile";
 
 function App() {
   return (
@@ -51,7 +52,7 @@ function App() {
                 path="/profile/edit"
                 element={
                   <PrivateRoute>
-                    <div>Edit Profile Page (coming soon)</div>
+                    <EditProfile />
                   </PrivateRoute>
                 }
               />
