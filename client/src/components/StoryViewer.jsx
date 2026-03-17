@@ -159,4 +159,13 @@ function StoryViewer({ isOpen, onClose, stories }) {
   );
 }
 
+StoryViewer.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  stories: PropTypes.shape({
+    author: PropTypes.object,
+    stories: PropTypes.array
+  })
+};
+
 export default StoryViewer;

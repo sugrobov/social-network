@@ -75,4 +75,19 @@ const Modal = ({ isOpen, onClose, title, children, size = 'md', closeOnOverlayCl
   );
 };
 
+Modal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  title: PropTypes.string,
+  children: PropTypes.node.isRequired,
+  size: PropTypes.oneOf(['sm', 'md', 'lg', 'xl']),
+  closeOnOverlayClick: PropTypes.bool,
+  showCloseButton: PropTypes.bool,
+  actions: PropTypes.node,
+  className: PropTypes.string,
+  overlayClassName: PropTypes.string,
+  contentClassName: PropTypes.string
+};
+
+
 export default Modal;

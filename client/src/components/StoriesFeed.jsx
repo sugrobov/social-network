@@ -54,4 +54,8 @@ function StoriesFeed({ onStoryOpen }) {
   );
 }
 
+StoriesFeed.propTypes = {
+  onStoryOpen: PropTypes.func
+};
+
 export default StoriesFeed;

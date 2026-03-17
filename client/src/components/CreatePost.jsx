@@ -68,4 +68,8 @@ function CreatePost() {
     );
 }
 
+CreatePost.propTypes = {
+  // компонент не принимает пропсы  
+};
+
 export default CreatePost;

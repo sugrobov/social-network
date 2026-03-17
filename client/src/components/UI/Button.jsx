@@ -23,4 +23,14 @@ function Button({ children, variant = 'primary', size = 'md', className = '', ..
   );
 }
 
+Button.propTypes = {
+  children: PropTypes.node.isRequired,
+  variant: PropTypes.oneOf(['primary', 'secondary', 'ghost']),
+  size: PropTypes.oneOf(['sm', 'md', 'lg']),
+  className: PropTypes.string,
+  onClick: PropTypes.func,
+  disabled: PropTypes.bool,
+  type: PropTypes.oneOf(['button', 'submit', 'reset'])
+};
+
 export default Button;

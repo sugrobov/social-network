@@ -68,4 +68,24 @@ const Input = forwardRef(({
 
 Input.displayName = 'Input';
 
+Input.propTypes = {
+  label: PropTypes.string,
+  type: PropTypes.oneOf(['text', 'email', 'password', 'number', 'tel', 'url']),
+  error: PropTypes.string,
+  helperText: PropTypes.string,
+  required: PropTypes.bool,
+  disabled: PropTypes.bool,
+  className: PropTypes.string,
+  containerClassName: PropTypes.string,
+  labelClassName: PropTypes.string,
+  errorClassName: PropTypes.string,
+  name: PropTypes.string,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  onChange: PropTypes.func,
+  onBlur: PropTypes.func,
+  placeholder: PropTypes.string,
+  id: PropTypes.string,
+  autoComplete: PropTypes.string
+};
+
 export default Input;

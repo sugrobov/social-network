@@ -179,4 +179,30 @@ function PostCard({
     );
 }
 
+PostCard.propTypes = {
+  post: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    title: PropTypes.string,
+    content: PropTypes.string,
+    imageUrl: PropTypes.string,
+    createdAt: PropTypes.string,
+    likesCount: PropTypes.number,
+    commentsCount: PropTypes.number,
+    isLiked: PropTypes.bool,
+    user: PropTypes.object
+  }).isRequired,
+  user: PropTypes.object,
+  onEdit: PropTypes.func,
+  onDelete: PropTypes.func,
+  onLike: PropTypes.func,
+  onComment: PropTypes.func,
+  onShare: PropTypes.func,
+  isOwner: PropTypes.bool,
+  showActions: PropTypes.bool,
+  className: PropTypes.string,
+  imageClassName: PropTypes.string,
+  contentClassName: PropTypes.string,
+  footerClassName: PropTypes.string
+};
+
 export default PostCard;

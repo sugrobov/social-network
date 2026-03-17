@@ -9,4 +9,8 @@ function LoadingSpinner({ className = '' }) {
   );
 }
 
+LoadingSpinner.propTypes = {
+  className: PropTypes.string
+};
+
 export default LoadingSpinner;
