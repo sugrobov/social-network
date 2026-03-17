@@ -4,6 +4,7 @@ import Register from "./auth/Register";
 import Login from "./auth/Login";
 import Feed from "./feed/Feed";
 import PrivateRoute from "../components/PrivateRoute";
+import Profile from "./profile/Profile";
 
 function App() {
   return (
@@ -34,12 +35,23 @@ function App() {
                 path="/profile"
                 element={
                   <PrivateRoute>
-                    <div className="bg-white p-6 rounded-lg shadow-md text-center">
-                      <h2 className="text-xl font-semibold text-gray-800 mb-2">
-                        Профиль пользователя
-                      </h2>
-                      <p className="text-gray-600">Страница в разработке</p>
-                    </div>
+                    <Profile />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/profile/:userId"
+                element={
+                  <PrivateRoute>
+                    <Profile />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/profile/edit"
+                element={
+                  <PrivateRoute>
+                    <div>Edit Profile Page (coming soon)</div>
                   </PrivateRoute>
                 }
               />
