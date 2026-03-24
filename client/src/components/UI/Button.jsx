@@ -1,5 +1,7 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { cn } from '../../utils/cn';
+
 
 function Button({ children, variant = 'primary', size = 'md', className = '', ...props }) {
   const baseClasses = "px-4 py-2 rounded font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2";

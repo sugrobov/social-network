@@ -1,4 +1,5 @@
 import React, { forwardRef } from 'react';
+import PropTypes from 'prop-types';
 import { cn } from '../../utils/cn';    
 
 // Input UI component
