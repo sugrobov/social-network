@@ -1,5 +1,6 @@
 import express from 'express';
 import { authenticateToken } from '../middleware/auth.js';
+import {  users } from '../data/users.js';
 
 const router = express.Router();
 
@@ -51,17 +52,36 @@ router.get('/:id', authenticateToken, async (req, res) => {
 router.put('/profile', authenticateToken, async (req, res) => {
   try {
     const { firstName, lastName, bio } = req.body;
-    
-    // Обновляем user
-    req.user.firstName = firstName || req.user.firstName;
-    req.user.lastName = lastName || req.user.lastName;
-    req.user.bio = bio || req.user.bio;
 
-    res.json({
-      message: 'Profile updated successfully',
-      user: req.user
-    });
+    // Находим пользователя в массиве
+    const userIndex = users.findIndex(u => u.id === req.user.id);
+    if (userIndex === -1) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Обновляем поля
+    if (firstName !== undefined) users[userIndex].firstName = firstName;
+    if (lastName !== undefined) users[userIndex].lastName = lastName;
+    if (bio !== undefined) users[userIndex].bio = bio;
+
+    // Формируем ответ
+    const updatedUser = {
+      id: users[userIndex].id,
+      username: users[userIndex].username,
+      email: users[userIndex].email,
+      firstName: users[userIndex].firstName,
+      lastName: users[userIndex].lastName,
+      avatar: users[userIndex].avatar || '',
+      bio: users[userIndex].bio || '',
+      createdAt: users[userIndex].createdAt
+    };
+
+    // Обновляем req.user
+    req.user = updatedUser;
+
+    res.json({ user: updatedUser });
   } catch (error) {
+    console.error('Update profile error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });

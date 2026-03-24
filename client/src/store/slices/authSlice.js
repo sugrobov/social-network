@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { authService } from '../../services/authService';
 import storage from '../../services/storage';
+import { updateProfile, uploadAvatar } from './profileSlice';
 
 // Вспомогательная функция сохранения данных (теперь асинхронная)
 const saveAuthData = async (data) => {
@@ -87,6 +88,20 @@ const authSlice = createSlice({
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        // Обновляем пользователя в auth, если это тот же юзер
+        if (state.user && state.user.id === action.payload.id) {
+          state.user = { ...state.user, ...action.payload };
+          // Сохраняем в хранилище
+          storage.setItem('user', JSON.stringify(state.user));
+        }
+      })
+      .addCase(uploadAvatar.fulfilled, (state, action) => {
+        if (state.user) {
+          state.user.avatar = action.payload.avatar; // action.payload.avatar — полный URL
+          storage.setItem('user', JSON.stringify(state.user));
+        }
       });
   },
 });

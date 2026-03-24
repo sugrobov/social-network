@@ -47,7 +47,7 @@ export const uploadAvatar = createAsyncThunk(
       const response = await api.post('/upload/avatar', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      return response.data.avatar;
+      return response.data; // возвращаем объект
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to upload avatar');
     }
@@ -120,7 +120,7 @@ const profileSlice = createSlice({
       // Upload avatar
       .addCase(uploadAvatar.fulfilled, (state, action) => {
         if (state.profile) {
-          state.profile.avatar = action.payload;
+          state.profile.avatar = action.payload.avatar;
         }
       })
       // Delete post

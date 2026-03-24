@@ -2,6 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import path from 'path';
 import { authenticateToken } from '../middleware/auth.js';
+import { users } from '../data/users.js';
 
 const router = express.Router();
 
@@ -39,12 +40,23 @@ router.post('/avatar', authenticateToken, upload.single('avatar'), async (req, r
       return res.status(400).json({ message: 'No file uploaded' });
     }
 
-    // Обновляем аватар пользователя
-    req.user.avatar = `/uploads/${req.file.filename}`;
+    // Формируем полный URL аватара
+    const avatarUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
 
+ // Обновляем в массиве users
+    const userIndex = users.findIndex(u => u.id === req.user.id);
+    if (userIndex !== -1) {
+      users[userIndex].avatar = avatarUrl;
+    }
+
+    // Обновляем req.user (для текущего запроса)
+    req.user.avatar = avatarUrl;
+
+    // Возвращаем полный объект (как ожидает клиент)
     res.json({
       message: 'Avatar uploaded successfully',
-      avatar: req.user.avatar
+      avatar: avatarUrl,
+      user: req.user
     });
   } catch (error) {
     res.status(500).json({ message: 'Upload failed', error: error.message });
