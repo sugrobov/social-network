@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom'; // Link -> NavLink
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../store/slices/authSlice';
 import BurgerButton from '../UI/BurgerButton';
@@ -8,8 +8,7 @@ import { navLinks } from '../../constants/navigation';
 import { useWindowSize } from '../../hooks/useWindowSize';
 
 function Header() {
-  const menuWidth = 768;
-  const { isMobile } = useWindowSize(); 
+  const { isMobile } = useWindowSize(); // используем дефолтный breakpoint 768
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, isAuthenticated } = useSelector((state) => state.auth);
@@ -42,9 +41,9 @@ function Header() {
       <header className="bg-white shadow-sm border-b fixed top-0 left-0 right-0 z-40">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
-            <Link to="/" className="text-2xl font-bold text-blue-600">
+            <NavLink to="/" className="text-2xl font-bold text-blue-600">
               SocialNetwork
-            </Link>
+            </NavLink>
 
             {/* Десктопная навигация */}
             <nav className="hidden md:flex items-center space-x-6">
@@ -55,13 +54,15 @@ function Header() {
               )}
               
               {links.map((link, index) => (
-                <Link
+                <NavLink
                   key={index}
                   to={link.to}
-                  className={link.className}
+                  className={({ isActive }) =>
+                    `${link.className} ${isActive ? 'text-blue-600 font-medium' : ''}`
+                  }
                 >
                   {link.label}
-                </Link>
+                </NavLink>
               ))}
 
               {isAuthenticated && (

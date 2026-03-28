@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { mobileNavLinks } from '../../constants/navigation';
 import Avatar from '../UI/Avatar';
@@ -19,8 +19,9 @@ function SideMenu({ isOpen, onClose, isAuthenticated, user, onLogout }) {
 
             {/* меню */}
             <div
-                className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg z-50 transform transition-transform duration-300 ease-in-out md:hidden ${isOpen ? 'translate-x-0' : 'translate-x-full'
-                    }`}
+                className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg z-50 transform transition-transform duration-300 ease-in-out md:hidden ${
+                    isOpen ? 'translate-x-0' : 'translate-x-full'
+                }`}
             >
                 <div className="p-6">
                     {/* Заголовок */}
@@ -40,7 +41,9 @@ function SideMenu({ isOpen, onClose, isAuthenticated, user, onLogout }) {
                             <div className="flex items-center space-x-3">
                                 <Avatar user={user} size="md" />
                                 <div>
-                                    <p className="font-semibold">{user.firstName} {user.lastName}</p>
+                                    <p className="font-semibold">
+                                        {user.firstName} {user.lastName}
+                                    </p>
                                     <p className="text-sm text-gray-500">{user.email}</p>
                                 </div>
                             </div>
@@ -59,8 +62,11 @@ function SideMenu({ isOpen, onClose, isAuthenticated, user, onLogout }) {
                                     <button
                                         key={index}
                                         onClick={onLogout}
-                                        className={`text-left py-1.5 transition-colors ${item.isDanger ? 'text-red-500 hover:text-red-600' : 'text-gray-700 hover:text-blue-600'
-                                            }`}
+                                        className={`text-left py-1.5 transition-colors ${
+                                            item.isDanger
+                                                ? 'text-red-500 hover:text-red-600'
+                                                : 'text-gray-700 hover:text-blue-600'
+                                        }`}
                                     >
                                         {item.label}
                                     </button>
@@ -68,17 +74,23 @@ function SideMenu({ isOpen, onClose, isAuthenticated, user, onLogout }) {
                             }
 
                             return (
-                                <Link
+                                <NavLink
                                     key={index}
                                     to={item.to}
-                                    className={`py-1.5 transition-colors ${item.isHighlighted
-                                        ? 'text-blue-500 hover:text-blue-600 font-medium'
-                                        : 'text-gray-700 hover:text-blue-600'
-                                        }`}
+                                    className={({ isActive }) => {
+                                        let baseClass = 'py-1.5 transition-colors';
+                                        if (isActive) {
+                                            return `${baseClass} text-blue-600 font-medium`;
+                                        }
+                                        if (item.isHighlighted) {
+                                            return `${baseClass} text-blue-500 hover:text-blue-600 font-medium`;
+                                        }
+                                        return `${baseClass} text-gray-700 hover:text-blue-600`;
+                                    }}
                                     onClick={onClose}
                                 >
                                     {item.label}
-                                </Link>
+                                </NavLink>
                             );
                         })}
                     </nav>
@@ -93,7 +105,7 @@ SideMenu.propTypes = {
     onClose: PropTypes.func.isRequired,
     isAuthenticated: PropTypes.bool.isRequired,
     user: PropTypes.object,
-    onLogout: PropTypes.func.isRequired
+    onLogout: PropTypes.func.isRequired,
 };
 
 export default SideMenu;
