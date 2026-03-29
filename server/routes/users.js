@@ -1,6 +1,6 @@
 import express from 'express';
 import { authenticateToken } from '../middleware/auth.js';
-import {  users } from '../data/users.js';
+import { users } from '../data/users.js';
 
 const router = express.Router();
 
@@ -16,7 +16,9 @@ router.get('/me', authenticateToken, (req, res) => {
         lastName: req.user.lastName,
         avatar: req.user.avatar,
         bio: req.user.bio || '',
-        createdAt: req.user.createdAt
+        createdAt: req.user.createdAt,
+        followersCount: req.user.followers.length,
+        followingCount: req.user.following.length
       }
     });
   } catch (error) {
@@ -24,25 +26,28 @@ router.get('/me', authenticateToken, (req, res) => {
   }
 });
 
-// Get user by ID
+// Get user by ID (с обновлёнными полями)
 router.get('/:id', authenticateToken, async (req, res) => {
   try {
     const userId = req.params.id;
-    
-    // Mock
-    const user = {
-      id: userId,
-      username: 'johndoe',
-      firstName: 'John',
-      lastName: 'Doe',
-      avatar: '',
-      bio: 'Hello! I am John Doe.',
-      createdAt: new Date(),
-      followers: 150,
-      following: 89
-    };
-
-    res.json({ user });
+    const user = users.find(u => u.id === userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json({
+      user: {
+        id: user.id,
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        avatar: user.avatar || '',
+        bio: user.bio || '',
+        createdAt: user.createdAt,
+        followersCount: user.followers.length,
+        followingCount: user.following.length,
+        isFollowing: req.user.following.includes(userId)
+      }
+    });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
@@ -52,19 +57,15 @@ router.get('/:id', authenticateToken, async (req, res) => {
 router.put('/profile', authenticateToken, async (req, res) => {
   try {
     const { firstName, lastName, bio } = req.body;
-
-    // Находим пользователя в массиве
     const userIndex = users.findIndex(u => u.id === req.user.id);
     if (userIndex === -1) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Обновляем поля
     if (firstName !== undefined) users[userIndex].firstName = firstName;
     if (lastName !== undefined) users[userIndex].lastName = lastName;
     if (bio !== undefined) users[userIndex].bio = bio;
 
-    // Формируем ответ
     const updatedUser = {
       id: users[userIndex].id,
       username: users[userIndex].username,
@@ -73,12 +74,12 @@ router.put('/profile', authenticateToken, async (req, res) => {
       lastName: users[userIndex].lastName,
       avatar: users[userIndex].avatar || '',
       bio: users[userIndex].bio || '',
-      createdAt: users[userIndex].createdAt
+      createdAt: users[userIndex].createdAt,
+      followersCount: users[userIndex].followers.length,
+      followingCount: users[userIndex].following.length
     };
 
-    // Обновляем req.user
     req.user = updatedUser;
-
     res.json({ user: updatedUser });
   } catch (error) {
     console.error('Update profile error:', error);
@@ -90,16 +91,34 @@ router.put('/profile', authenticateToken, async (req, res) => {
 router.post('/:id/follow', authenticateToken, async (req, res) => {
   try {
     const userIdToFollow = req.params.id;
-    
-    if (userIdToFollow === req.user.id) {
+    const currentUserId = req.user.id;
+
+    if (userIdToFollow === currentUserId) {
       return res.status(400).json({ message: 'Cannot follow yourself' });
     }
 
-    res.json({ 
+    const userToFollow = users.find(u => u.id === userIdToFollow);
+    const currentUser = users.find(u => u.id === currentUserId);
+
+    if (!userToFollow) {
+      return res.status(404).json({ message: 'User to follow not found' });
+    }
+
+    if (currentUser.following.includes(userIdToFollow)) {
+      return res.status(400).json({ message: 'Already following this user' });
+    }
+
+    currentUser.following.push(userIdToFollow);
+    userToFollow.followers.push(currentUserId);
+
+    res.json({
       message: 'User followed successfully',
-      following: true
+      following: true,
+      followersCount: userToFollow.followers.length,
+      followingCount: currentUser.following.length
     });
   } catch (error) {
+    console.error('Follow error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
@@ -108,37 +127,55 @@ router.post('/:id/follow', authenticateToken, async (req, res) => {
 router.post('/:id/unfollow', authenticateToken, async (req, res) => {
   try {
     const userIdToUnfollow = req.params.id;
+    const currentUserId = req.user.id;
 
-    res.json({ 
+    const userToUnfollow = users.find(u => u.id === userIdToUnfollow);
+    const currentUser = users.find(u => u.id === currentUserId);
+
+    if (!userToUnfollow) {
+      return res.status(404).json({ message: 'User to unfollow not found' });
+    }
+
+    if (!currentUser.following.includes(userIdToUnfollow)) {
+      return res.status(400).json({ message: 'Not following this user' });
+    }
+
+    currentUser.following = currentUser.following.filter(id => id !== userIdToUnfollow);
+    userToUnfollow.followers = userToUnfollow.followers.filter(id => id !== currentUserId);
+
+    res.json({
       message: 'User unfollowed successfully',
-      following: false
+      following: false,
+      followersCount: userToUnfollow.followers.length,
+      followingCount: currentUser.following.length
     });
   } catch (error) {
+    console.error('Unfollow error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
-// Get user's followers
+// Get followers list
 router.get('/:id/followers', authenticateToken, async (req, res) => {
   try {
-    const followers = [
-      {
-        id: '2',
-        username: 'alice',
-        firstName: 'Alice',
-        lastName: 'Smith',
-        avatar: '',
-        isFollowing: true
-      },
-      {
-        id: '3', 
-        username: 'bob',
-        firstName: 'Bob',
-        lastName: 'Johnson',
-        avatar: '',
-        isFollowing: false
-      }
-    ];
+    const userId = req.params.id;
+    const user = users.find(u => u.id === userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const followers = user.followers.map(followerId => {
+      const follower = users.find(u => u.id === followerId);
+      if (!follower) return null;
+      return {
+        id: follower.id,
+        username: follower.username,
+        firstName: follower.firstName,
+        lastName: follower.lastName,
+        avatar: follower.avatar,
+        isFollowing: req.user.following.includes(follower.id)
+      };
+    }).filter(Boolean);
 
     res.json({ followers });
   } catch (error) {
@@ -146,19 +183,27 @@ router.get('/:id/followers', authenticateToken, async (req, res) => {
   }
 });
 
-// Get user's following
+// Get following list
 router.get('/:id/following', authenticateToken, async (req, res) => {
   try {
-    const following = [
-      {
-        id: '4',
-        username: 'charlie',
-        firstName: 'Charlie',
-        lastName: 'Brown',
-        avatar: '',
+    const userId = req.params.id;
+    const user = users.find(u => u.id === userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const following = user.following.map(followingId => {
+      const followedUser = users.find(u => u.id === followingId);
+      if (!followedUser) return null;
+      return {
+        id: followedUser.id,
+        username: followedUser.username,
+        firstName: followedUser.firstName,
+        lastName: followedUser.lastName,
+        avatar: followedUser.avatar,
         isFollowing: true
-      }
-    ];
+      };
+    }).filter(Boolean);
 
     res.json({ following });
   } catch (error) {
@@ -170,56 +215,36 @@ router.get('/:id/following', authenticateToken, async (req, res) => {
 router.get('/', authenticateToken, async (req, res) => {
   try {
     const { q } = req.query;
-
     if (!q) {
       return res.status(400).json({ message: 'Search query is required' });
     }
 
-    const users = [
-      {
-        id: '5',
-        username: 'johnsmith',
-        firstName: 'John',
-        lastName: 'Smith',
-        avatar: '',
-        isFollowing: false
-      },
-      {
-        id: '6',
-        username: 'johnny',
-        firstName: 'Johnny',
-        lastName: 'Depp',
-        avatar: '',
-        isFollowing: true
-      }
-    ].filter(user => 
+    const results = users.filter(user =>
       user.username.toLowerCase().includes(q.toLowerCase()) ||
       user.firstName.toLowerCase().includes(q.toLowerCase()) ||
       user.lastName.toLowerCase().includes(q.toLowerCase())
-    );
+    ).map(user => ({
+      id: user.id,
+      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      avatar: user.avatar,
+      isFollowing: req.user.following.includes(user.id)
+    }));
 
-    res.json({ users });
+    res.json({ users: results });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
-/**
- * GET /api/users/:userId/posts - получить посты пользователя
- */
+// GET /api/users/:userId/posts
 router.get('/:userId/posts', authenticateToken, async (req, res) => {
   try {
     const { userId } = req.params;
-    
-    // Здесь должна быть логика получения постов из БД
-    // Пока используем мок-данные из posts.js
-    
-    // Импортируем posts (в реальном проекте здесь будет запрос к БД)
+    // Используем мок-данные из posts.js (в проекте — запрос к БД)
     const { posts } = await import('../data/posts.js');
-    
-    // Фильтруем посты по автору
     const userPosts = posts.filter(post => post.author.id === userId);
-    
     res.json(userPosts);
   } catch (error) {
     console.error('Error fetching user posts:', error);
@@ -227,16 +252,11 @@ router.get('/:userId/posts', authenticateToken, async (req, res) => {
   }
 });
 
-/**
- * DELETE /api/posts/:postId - удалить пост (для владельца)
- */
+// DELETE /api/users/posts/:postId
 router.delete('/posts/:postId', authenticateToken, async (req, res) => {
   try {
     const { postId } = req.params;
-    
-    // Здесь логика удаления поста из БД
-    // Проверяем, что пост принадлежит текущему пользователю
-    
+    // Логика удаления поста (в проекте — запрос к БД)
     res.json({ message: 'Post deleted successfully' });
   } catch (error) {
     console.error('Error deleting post:', error);
