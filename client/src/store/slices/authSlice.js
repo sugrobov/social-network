@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { authService } from '../../services/authService';
 import storage from '../../services/storage';
-import { updateProfile, uploadAvatar } from './profileSlice';
+import { updateProfile, uploadAvatar, followUser, unfollowUser } from './profileSlice';
 
 // Вспомогательная функция сохранения данных (теперь асинхронная)
 const saveAuthData = async (data) => {
@@ -101,6 +101,19 @@ const authSlice = createSlice({
         if (state.user) {
           state.user.avatar = action.payload.avatar; // action.payload.avatar — полный URL
           storage.setItem('user', JSON.stringify(state.user));
+        }
+      })
+      .addCase(followUser.fulfilled, (state, action) => {
+        // Если текущий пользователь подписался на кого-то
+        if (state.user && action.meta.arg !== state.user.id) {
+          state.user.followingCount = action.payload.followingCount;
+          // Обновляем массив following, если нужно (но мы его не храним в user, только счётчик)
+          // Если хотим хранить, то можно добавить в user.following, но для простоты пока только счётчик
+        }
+      })
+      .addCase(unfollowUser.fulfilled, (state, action) => {
+        if (state.user && action.meta.arg !== state.user.id) {
+          state.user.followingCount = action.payload.followingCount;
         }
       });
   },
