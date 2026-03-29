@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
-import { fetchUserProfile, fetchUserPosts, deleteUserPost } from '../../store/slices/profileSlice';
+import { fetchUserProfile, fetchUserPosts, deleteUserPost, followUser, unfollowUser, fetchFollowers, fetchFollowing } from '../../store/slices/profileSlice';
 import Avatar from '../../components/UI/Avatar';
 import Button from '../../components/UI/Button';
 import Post from '../../components/Post';
 import LoadingSpinner from '../../components/UI/LoadingSpinner';
 import Tabs from '../../components/UI/Tabs';
+import UserListModal from '../../components/UI/UserListModal';
 
 function Profile() {
   const { userId } = useParams();
@@ -14,8 +15,11 @@ function Profile() {
   const dispatch = useDispatch();
 
   const { user: currentUser } = useSelector((state) => state.auth);
-  const { profile, posts, loading, error } = useSelector((state) => state.profile);
+  const { profile, posts, loading, error, followersList, followingList, followersLoading, followingLoading } = useSelector((state) => state.profile);
   const [activeTab, setActiveTab] = useState('posts');
+  const [isFollowingLoading, setIsFollowingLoading] = useState(false);
+  const [showFollowersModal, setShowFollowersModal] = useState(false);
+  const [showFollowingModal, setShowFollowingModal] = useState(false);
 
   const isOwnProfile = !userId || userId === currentUser?.id;
   const profileUser = isOwnProfile ? currentUser : profile;
@@ -25,7 +29,6 @@ function Profile() {
       dispatch(fetchUserProfile(userId));
       dispatch(fetchUserPosts(userId));
     } else if (currentUser) {
-      // Для своего профиля загружаем посты текущего пользователя
       dispatch(fetchUserPosts(currentUser.id));
     }
   }, [userId, currentUser, dispatch]);
@@ -38,6 +41,38 @@ function Profile() {
         alert('Ошибка при удалении поста');
       }
     }
+  };
+
+  const handleFollow = async () => {
+    setIsFollowingLoading(true);
+    try {
+      await dispatch(followUser(profileUser.id)).unwrap();
+    } catch (error) {
+      alert('Не удалось подписаться');
+    } finally {
+      setIsFollowingLoading(false);
+    }
+  };
+
+  const handleUnfollow = async () => {
+    setIsFollowingLoading(true);
+    try {
+      await dispatch(unfollowUser(profileUser.id)).unwrap();
+    } catch (error) {
+      alert('Не удалось отписаться');
+    } finally {
+      setIsFollowingLoading(false);
+    }
+  };
+
+  const handleOpenFollowers = () => {
+    dispatch(fetchFollowers(profileUser.id));
+    setShowFollowersModal(true);
+  };
+
+  const handleOpenFollowing = () => {
+    dispatch(fetchFollowing(profileUser.id));
+    setShowFollowingModal(true);
   };
 
   if (loading && !profileUser && !posts.length) {
@@ -85,11 +120,11 @@ function Profile() {
                 <span className="block font-bold text-xl">{posts?.length || 0}</span>
                 <span className="text-gray-500 text-sm">постов</span>
               </div>
-              <div className="text-center">
+              <div className="text-center cursor-pointer" onClick={handleOpenFollowers}>
                 <span className="block font-bold text-xl">{profileUser?.followersCount || 0}</span>
                 <span className="text-gray-500 text-sm">подписчиков</span>
               </div>
-              <div className="text-center">
+              <div className="text-center cursor-pointer" onClick={handleOpenFollowing}>
                 <span className="block font-bold text-xl">{profileUser?.followingCount || 0}</span>
                 <span className="text-gray-500 text-sm">подписок</span>
               </div>
@@ -105,10 +140,26 @@ function Profile() {
               </Button>
             ) : (
               <div className="flex gap-3">
-                <Button variant="primary" className="flex-1 sm:flex-none">
-                  Подписаться
-                </Button>
-                <Button variant="secondary" className="flex-1 sm:flex-none">
+                {profileUser?.isFollowing ? (
+                  <Button
+                    variant="secondary"
+                    onClick={handleUnfollow}
+                    disabled={isFollowingLoading}
+                    className="w-full sm:w-auto"
+                  >
+                    {isFollowingLoading ? '...' : 'Отписаться'}
+                  </Button>
+                ) : (
+                  <Button
+                    variant="primary"
+                    onClick={handleFollow}
+                    disabled={isFollowingLoading}
+                    className="w-full sm:w-auto"
+                  >
+                    {isFollowingLoading ? '...' : 'Подписаться'}
+                  </Button>
+                )}
+                <Button variant="secondary" className="w-full sm:w-auto">
                   Написать
                 </Button>
               </div>
@@ -162,6 +213,40 @@ function Profile() {
           </div>
         )}
       </div>
+
+      {/* Модальные окна для списков */}
+      <UserListModal
+        isOpen={showFollowersModal}
+        onClose={() => setShowFollowersModal(false)}
+        title="Подписчики"
+        users={followersList}
+        loading={followersLoading}
+        currentUserId={currentUser?.id}
+        onFollowChange={() => {
+          // После изменения подписки в модалке можно обновить данные профиля
+          if (profileUser?.id) {
+            dispatch(fetchUserProfile(profileUser.id));
+            if (!isOwnProfile) {
+              // Обновляем также isFollowing для текущего пользователя (если он есть в списке)
+              // Но для простоты просто перезагрузим профиль
+              dispatch(fetchUserProfile(profileUser.id));
+            }
+          }
+        }}
+      />
+      <UserListModal
+        isOpen={showFollowingModal}
+        onClose={() => setShowFollowingModal(false)}
+        title="Подписки"
+        users={followingList}
+        loading={followingLoading}
+        currentUserId={currentUser?.id}
+        onFollowChange={() => {
+          if (profileUser?.id) {
+            dispatch(fetchUserProfile(profileUser.id));
+          }
+        }}
+      />
     </div>
   );
 }
