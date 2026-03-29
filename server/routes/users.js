@@ -1,6 +1,7 @@
 import express from 'express';
 import { authenticateToken } from '../middleware/auth.js';
 import { users } from '../data/users.js';
+import { getUserPosts, deletePost } from '../data/posts.js';
 
 const router = express.Router();
 
@@ -242,9 +243,7 @@ router.get('/', authenticateToken, async (req, res) => {
 router.get('/:userId/posts', authenticateToken, async (req, res) => {
   try {
     const { userId } = req.params;
-    // Используем мок-данные из posts.js (в проекте — запрос к БД)
-    const { posts } = await import('../data/posts.js');
-    const userPosts = posts.filter(post => post.author.id === userId);
+    const userPosts = getUserPosts(userId);
     res.json(userPosts);
   } catch (error) {
     console.error('Error fetching user posts:', error);
@@ -255,13 +254,26 @@ router.get('/:userId/posts', authenticateToken, async (req, res) => {
 // DELETE /api/users/posts/:postId
 router.delete('/posts/:postId', authenticateToken, async (req, res) => {
   try {
-    const { postId } = req.params;
-    // Логика удаления поста (в проекте — запрос к БД)
-    res.json({ message: 'Post deleted successfully' });
+const { postId } = req.params;
+    // Проверяем, что пост принадлежит текущему пользователю
+    const post = findPostById(postId); 
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+    if (post.author.id !== req.user.id) {
+      return res.status(403).json({ message: 'Not authorized to delete this post' });
+    }
+    const deleted = deletePost(postId);
+    if (deleted) {
+      res.json({ message: 'Post deleted successfully' });
+    } else {
+      res.status(404).json({ message: 'Post not found' });
+    }
   } catch (error) {
     console.error('Error deleting post:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
+
 
 export default router;

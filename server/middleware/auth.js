@@ -23,6 +23,8 @@ export const authenticateToken = (req, res, next) => {
       lastName: user.lastName,
       avatar: user.avatar  || '',
       bio: user.bio || '',
+      followers: user.followers || [],
+      following: user.following || [],
       createdAt: user.createdAt
     };
 

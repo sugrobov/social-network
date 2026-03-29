@@ -14,8 +14,8 @@ router.post('/register', async (req, res) => {
     // Check if user exists
     const existingUser = users.find(u => u.email === email || u.username === username);
     if (existingUser) {
-      return res.status(400).json({ 
-        message: 'User with this email or username already exists' 
+      return res.status(400).json({
+        message: 'User with this email or username already exists'
       });
     }
 
@@ -31,6 +31,9 @@ router.post('/register', async (req, res) => {
       firstName,
       lastName,
       avatar: '',
+      bio: '',
+      followers: [],
+      following: [],
       createdAt: new Date()
     };
 
@@ -38,8 +41,8 @@ router.post('/register', async (req, res) => {
 
     // Generate token
     const token = jwt.sign(
-      { userId: user.id }, 
-      process.env.JWT_SECRET, 
+      { userId: user.id },
+      process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
 
@@ -77,8 +80,8 @@ router.post('/login', async (req, res) => {
 
     // Generate token
     const token = jwt.sign(
-      { userId: user.id }, 
-      process.env.JWT_SECRET, 
+      { userId: user.id },
+      process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
 

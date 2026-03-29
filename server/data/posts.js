@@ -43,3 +43,38 @@ export const posts = [
     createdAt: new Date(Date.now() - 172800000).toISOString()
   }
 ];
+
+// Получить все посты (с возможностью фильтрации по автору)
+export const getAllPosts = () => posts;
+
+// Получить посты определённого пользователя
+export const getUserPosts = (userId) => {
+  return posts.filter(post => post.author.id === userId);
+};
+
+// Добавить новый пост
+export const addPost = (post) => {
+  posts.unshift(post);
+  return post;
+};
+
+// Обновить существующий пост (лайки, комментарии)
+export const updatePost = (updatedPost) => {
+  const index = posts.findIndex(p => p.id === updatedPost.id);
+  if (index !== -1) {
+    posts[index] = updatedPost;
+  }
+  return updatedPost;
+};
+
+// Удалить пост по id
+export const deletePost = (postId) => {
+  const initialLength = posts.length;
+  posts = posts.filter(p => p.id !== postId);
+  return posts.length < initialLength;
+};
+
+// Найти пост по id
+export const findPostById = (postId) => {
+  return posts.find(p => p.id === postId);
+};

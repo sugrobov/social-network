@@ -1,46 +1,37 @@
 import express from 'express';
 import { authenticateToken } from '../middleware/auth.js';
+import { getAllPosts, addPost, updatePost, findPostById, deletePost } from '../data/posts.js';
 
 const router = express.Router();
 
-// Mock posts data
-let posts = [
-  {
-    id: '1',
-    author: {
-      id: '1',
-      username: 'johndoe',
-      firstName: 'John',
-      lastName: 'Doe',
-      avatar: ''
-    },
-    content: 'This is my first post! Hello world!',
-    image: '',
-    likes: ['2', '3'],
-    comments: [
-      {
-        id: '1',
-        author: {
-          id: '2',
-          username: 'alice',
-          firstName: 'Alice',
-          lastName: 'Smith',
-          avatar: ''
-        },
-        content: 'Great post!',
-        createdAt: new Date()
-      }
-    ],
-    createdAt: new Date()
-  }
-];
+// GET /api/posts - Лента (только посты подписок + свои)
+router.get('/', authenticateToken, (req, res) => {
+  try {
+    const currentUserId = req.user.id;
+    const followingIds = req.user.following; // массив ID пользователей, на кого подписан
 
-// Create post
+    let allPosts = getAllPosts();
+
+    // Фильтруем: автор — текущий пользователь ИЛИ автор в following
+    const feedPosts = allPosts.filter(post => 
+      post.author.id === currentUserId || followingIds.includes(post.author.id)
+    );
+
+    // Сортируем по дате (новые сверху)
+    feedPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    res.json(feedPosts);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// POST /api/posts - Создать пост
 router.post('/', authenticateToken, async (req, res) => {
   try {
     const { content, image } = req.body;
 
-    const post = {
+    const newPost = {
       id: Date.now().toString(),
       author: {
         id: req.user.id,
@@ -53,31 +44,21 @@ router.post('/', authenticateToken, async (req, res) => {
       image: image || '',
       likes: [],
       comments: [],
-      createdAt: new Date()
+      createdAt: new Date().toISOString()
     };
 
-    posts.unshift(post);
-
-    res.status(201).json(post);
+    addPost(newPost);
+    res.status(201).json(newPost);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
-// Get all posts
-router.get('/', authenticateToken, async (req, res) => {
-  try {
-    res.json(posts);
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-});
-
-// Like/unlike post
-router.post('/:id/like', authenticateToken, async (req, res) => {
+// POST /api/posts/:id/like - Лайк/дизлайк
+router.post('/:id/like', authenticateToken, (req, res) => {
   try {
     const postId = req.params.id;
-    const post = posts.find(p => p.id === postId);
+    const post = findPostById(postId);
     if (!post) {
       return res.status(404).json({ message: 'Post not found' });
     }
@@ -89,19 +70,19 @@ router.post('/:id/like', authenticateToken, async (req, res) => {
       post.likes.push(req.user.id);
     }
 
+    updatePost(post);
     res.json({ post });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
-// Add comment
-router.post('/:id/comments', authenticateToken, async (req, res) => {
+// POST /api/posts/:id/comments - Добавить комментарий
+router.post('/:id/comments', authenticateToken, (req, res) => {
   try {
     const postId = req.params.id;
     const { content } = req.body;
-
-    const post = posts.find(p => p.id === postId);
+    const post = findPostById(postId);
     if (!post) {
       return res.status(404).json({ message: 'Post not found' });
     }
@@ -116,33 +97,35 @@ router.post('/:id/comments', authenticateToken, async (req, res) => {
         avatar: req.user.avatar
       },
       content,
-      createdAt: new Date()
+      createdAt: new Date().toISOString()
     };
 
     post.comments.push(comment);
+    updatePost(post);
     res.status(201).json({ postId, comment });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
-// Delete post
-router.delete('/:id', authenticateToken, async (req, res) => {
+// DELETE /api/posts/:id - Удалить пост (свои)
+router.delete('/:id', authenticateToken, (req, res) => {
   try {
     const postId = req.params.id;
-    const postIndex = posts.findIndex(p => p.id === postId);
-    
-    if (postIndex === -1) {
+    const post = findPostById(postId);
+    if (!post) {
       return res.status(404).json({ message: 'Post not found' });
     }
-
-    const post = posts[postIndex];
     if (post.author.id !== req.user.id) {
       return res.status(403).json({ message: 'Not authorized to delete this post' });
     }
 
-    posts.splice(postIndex, 1);
-    res.json({ message: 'Post deleted successfully' });
+    const deleted = deletePost(postId);
+    if (deleted) {
+      res.json({ message: 'Post deleted successfully' });
+    } else {
+      res.status(404).json({ message: 'Post not found' });
+    }
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
